@@ -28,4 +28,4 @@ SET
 WHERE email = 'mario@example.com';
 
 -- El status del usuario = 1
-select * from users u where u.user_status = 1
+select * from users u where u.user_status=1

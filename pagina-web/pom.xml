@@ -1,27 +1,3 @@
-# Hoteles App
-
-### Setup
-
-Para crear el proyecto se utilizan el comando
-
-_IMPORTANT:_ [proyecto] sustituirlo por el nombre real a usar
-
-```powershel
-
-mvn org.apache.maven.plugins:maven-archetype-plugin:3.2.1:generate `-DgroupId=com.umg ` -DartifactId=[proyecto] `-DarchetypeGroupId=org.apache.maven.archetypes `  -DarchetypeArtifactId=maven-archetype-webapp `  -DinteractiveMode=false
-
-```
-
-```powershel
-
-cd [proyecto]
-
-```
-
-Se agregan los plugins al archivo pom.xml para la utlizacion de Jetty como servidor para el ambiente local
-
-```xml
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -84,14 +60,3 @@ Se agregan los plugins al archivo pom.xml para la utlizacion de Jetty como servi
     </plugins>
   </build>
 </project>
-
-
-```
-
-Y para correr el proyecto se ejecuta el siguiente comando
-
-```powershel
-
-mvn jetty:run
-
-```
