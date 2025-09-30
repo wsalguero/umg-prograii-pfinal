@@ -1,14 +1,54 @@
 <%
-  String active = (String)request.getAttribute("active");
-  if (active == null) active = "";
+    String ctx    = request.getContextPath();
+    String active = (String) request.getAttribute("active");
+    if (active == null) active = "";
+
+    com.umg.models.Login u = (com.umg.models.Login) session.getAttribute("user");
+    boolean loggedIn = (u != null);
+    String userEmail = loggedIn ? u.getEmail() : "";
+
 %>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="<%=request.getContextPath()%>/home">HotelesApp</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a class="nav-link <%= "hoteles".equals(active)?"active":"" %>" href="#">Hoteles</a></li>
-      <li class="nav-item"><a class="nav-link <%= "reportes".equals(active)?"active":"" %>" href="#">Reportes</a></li>
-      <li class="nav-item"><a class="nav-link <%= "config".equals(active)?"active":"" %>" href="#">Configuración</a></li>
-    </ul>
+    <a class="navbar-brand" href="<%=ctx%>/home">HotelesApp</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto">
+
+        <% if (loggedIn) { %>
+          <!-- Opciones para usuario autenticado -->
+          <li class="nav-item">
+            <a class="nav-link <%= "dashboard".equals(active) ? "active" : "" %>" href="<%=ctx%>/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= "hoteles".equals(active) ? "active" : "" %>" href="<%=ctx%>/rooms">Habitaciones</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> <%= userEmail %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="<%=ctx%>/profile">Mi perfil</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="<%=ctx%>/logout">Cerrar sesi&oacute;n</a>
+              </li>
+            </ul>
+          </li>
+
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link <%= "login".equals(active) ? "active" : "" %>" href="<%=ctx%>/login">Login</a>
+          </li>
+        <% } %>
+
+      </ul>
+    </div>
   </div>
 </nav>

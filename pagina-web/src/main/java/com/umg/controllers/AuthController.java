@@ -47,7 +47,7 @@ public class AuthController extends HttpServlet {
             // int id = ((Number) row.get("id")).intValue(); // si lo necesitas
             // String address = asString(row.get("user_address"));
 
-            boolean ok = pass.equals(dbPass); // si usas hash, aquí compara con BCrypt/etc.
+            boolean ok = pass.equals(dbPass);
 
             if (!ok) {
                 flashAndBack(req, resp, "Credenciales inválidas.");
@@ -58,7 +58,7 @@ public class AuthController extends HttpServlet {
             HttpSession session = req.getSession(true);
             Login user = new Login();
             user.setEmail(dbEmail);
-            user.setPassword(null); // nunca guardes el password en sesión
+            user.setPassword(null); // no se guarda password en session
             session.setAttribute("user", user);
 
             resp.sendRedirect(req.getContextPath() + "/dashboard");
