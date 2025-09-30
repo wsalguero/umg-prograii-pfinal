@@ -12,7 +12,7 @@
   <!-- LOGIN PAGE -->
   <servlet>
     <servlet-name>login</servlet-name>
-    <jsp-file>/views/login/login.jsp</jsp-file>
+    <jsp-file>/views/login/index.jsp</jsp-file>
   </servlet>
   <servlet-mapping>
     <servlet-name>login</servlet-name>
@@ -27,6 +27,26 @@
   <servlet-mapping>
     <servlet-name>dashboard</servlet-name>
     <url-pattern>/dashboard</url-pattern>
+  </servlet-mapping>
+
+  <!-- Rooms PAGE -->
+  <servlet>
+    <servlet-name>rooms</servlet-name>
+    <jsp-file>/views/rooms/index.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>rooms</servlet-name>
+    <url-pattern>/rooms</url-pattern>
+  </servlet-mapping>
+
+    <!-- Guests PAGE -->
+  <servlet>
+    <servlet-name>guests</servlet-name>
+    <jsp-file>/views/guests/index.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>guests</servlet-name>
+    <url-pattern>/guests</url-pattern>
   </servlet-mapping>
 
   <!-- AUTH CONTROLLER: POST /auth -->

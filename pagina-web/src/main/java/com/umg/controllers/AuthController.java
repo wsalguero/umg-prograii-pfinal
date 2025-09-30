@@ -41,11 +41,8 @@ public class AuthController extends HttpServlet {
 
             Map<String, Object> row = rows.get(0);
 
-            // OJO: los nombres de columna deben coincidir con tu SELECT del SP
             String dbEmail = asString(row.get("email"));
             String dbPass = asString(row.get("user_password"));
-            // int id = ((Number) row.get("id")).intValue(); // si lo necesitas
-            // String address = asString(row.get("user_address"));
 
             boolean ok = pass.equals(dbPass);
 

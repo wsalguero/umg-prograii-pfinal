@@ -8,7 +8,7 @@
 
 
 <div class="d-flex justify-content-center">
-  <h1>Hola en home</h1>
+  <h1>Hola en huespedes</h1>
 </div>
 
 <%@ include file="/WEB-INF/layouts/footer.jspf" %>
