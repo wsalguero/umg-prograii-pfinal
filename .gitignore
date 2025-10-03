@@ -57,3 +57,6 @@ nbdist/
 # =======================
 .DS_Store
 Thumbs.db
+
+# Ignorar Db.java
+pagina-web/src/main/java/com/umg/utils/Db.java
