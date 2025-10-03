@@ -99,3 +99,7 @@ cd pagina-web
 mvn jetty:run
 
 ```
+
+La aplicacion empezara a correr en el puerto
+
+localhost:8080
