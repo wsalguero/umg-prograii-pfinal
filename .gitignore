@@ -59,4 +59,4 @@ nbdist/
 Thumbs.db
 
 # Ignorar Db.java
-pagina-web/src/main/java/com/umg/utils/Db.java
+# pagina-web/src/main/java/com/umg/utils/Db.java
