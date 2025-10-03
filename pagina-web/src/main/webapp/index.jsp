@@ -3,12 +3,14 @@
   // Variables “de layout”
   request.setAttribute("title", "Login");
   request.setAttribute("active", "login");
+
+  Object user = session.getAttribute("user");
+  if (user == null) {
+      response.sendRedirect(request.getContextPath() + "/login");
+      return;
+  }else{
+      response.sendRedirect(request.getContextPath() + "/dashboard");
+      return;
+  }
+
 %>
-<%@ include file="/WEB-INF/layouts/header.jspf" %>
-
-
-<div class="d-flex justify-content-center">
-  <h1>Hola en home</h1>
-</div>
-
-<%@ include file="/WEB-INF/layouts/footer.jspf" %>

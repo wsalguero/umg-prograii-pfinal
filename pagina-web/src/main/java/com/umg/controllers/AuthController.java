@@ -43,7 +43,7 @@ public class AuthController extends HttpServlet {
 
             String dbEmail = asString(row.get("email"));
             String dbPass = asString(row.get("user_password"));
-
+            String firtsname = asString(row.get("firstname"));
             boolean ok = pass.equals(dbPass);
 
             if (!ok) {
@@ -53,10 +53,13 @@ public class AuthController extends HttpServlet {
 
             // Login correcto: guarda un objeto pequeño en sesión
             HttpSession session = req.getSession(true);
-            Login user = new Login();
-            user.setEmail(dbEmail);
-            user.setPassword(null); // no se guarda password en session
-            session.setAttribute("user", user);
+
+            Login userSession = new Login();
+            userSession.setEmail(dbEmail);
+            userSession.setPassword(null); // no se guarda password en session
+            userSession.setFirstname(firtsname);
+
+            session.setAttribute("user", userSession);
 
             resp.sendRedirect(req.getContextPath() + "/dashboard");
         } catch (SQLException ex) {

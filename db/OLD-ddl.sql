@@ -20,6 +20,7 @@ create table type_registers(
     type_key enum("reservation","consumption","assignment","in","out"),
     primary key(id)
 );
+
 create table types_rooms (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     type_description VARCHAR(100),

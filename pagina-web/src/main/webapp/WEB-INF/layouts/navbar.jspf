@@ -6,6 +6,7 @@
     com.umg.models.Login u = (com.umg.models.Login) session.getAttribute("user");
     boolean loggedIn = (u != null);
     String userEmail = loggedIn ? u.getEmail() : "";
+    String userFirstname = loggedIn ? u.getFirstname() : "";
 
 %>
 
@@ -31,7 +32,7 @@
 
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle"></i> <%= userEmail %>
+              <i class="bi bi-person-circle"></i> <%= userFirstname %>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="<%=ctx%>/profile">Mi perfil</a></li>

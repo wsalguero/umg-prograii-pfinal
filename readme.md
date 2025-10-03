@@ -88,10 +88,14 @@ Se agregan los plugins al archivo pom.xml para la utlizacion de Jetty como servi
 
 ```
 
-Y para correr el proyecto se ejecuta el siguiente comando
+Y para correr el proyecto se ejecuta el siguiente comando, importante tener maven instalado antes de empezar a usarlo
+
+Instalar maven
+
+https://maven-apache-org.translate.goog/install.html?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc
 
 ```powershel
-
+cd pagina-web
 mvn jetty:run
 
 ```
