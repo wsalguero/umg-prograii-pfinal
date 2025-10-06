@@ -3,6 +3,9 @@ package com.umg.models;
 public class Rooms {
     private int id;
     private int idType;
+    private String descripcion;
+    private float price;
+    private int status;
 
     public int getId() {
         return id;
@@ -43,9 +46,5 @@ public class Rooms {
     public void setStatus(int status) {
         this.status = status;
     }
-
-    private String descripcion;
-    private float price;
-    private int status;
 
 }
