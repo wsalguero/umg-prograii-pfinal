@@ -6,13 +6,13 @@
   max-height: 90vh;
   width: 100vw;
 
-  & .page-part:first-child {
+  /* & .page-part:first-child {
     width: 80%;
   }
 
   & .page-part:last-child {
     width: 20%;
-  }
+  } */
 }
 
 .sidebar-list {
