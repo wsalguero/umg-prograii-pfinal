@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `type_registers`;
 CREATE TABLE `type_registers` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `type_description` varchar(300) DEFAULT NULL,
-  `type_key` enum('reservation','consumption','assignment','in','out') DEFAULT NULL,
+  `type_key` varchar(15) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
