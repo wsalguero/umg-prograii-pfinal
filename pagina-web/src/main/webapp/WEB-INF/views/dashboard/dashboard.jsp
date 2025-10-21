@@ -113,7 +113,10 @@
         <a href="<%= request.getContextPath() %>/billing" class="btn btn-warning text-white">
           <i class="fa-solid fa-file-invoice-dollar me-2"></i> Facturar
         </a>
-        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReservation">
+           <a href="<%= request.getContextPath() %>/history" class="btn btn-info text-white">
+          <i class="fa-solid fa-file-invoice-dollar me-2"></i> Historial
+        </a>
+        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalReservation">
           <i class="fa-solid fa-calendar-plus me-2"></i> Nueva reservación
         </button>
       </div>
@@ -272,8 +275,11 @@
 <!-- Modal: Nueva reservación -->
 <div class="modal fade" id="modalReservation" tabindex="-1" aria-labelledby="lblReservation" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form class="modal-content" method="POST" action="<%=request.getContextPath()%>/reservations" id="formReservation">
+    <form class="modal-content needs-validation" novalidate
+          method="POST" action="<%=request.getContextPath()%>/reservations" id="formReservation">
       <input type="hidden" name="action" value="create">
+      <input type="hidden" name="type_room_id" id="res-type-room-id" required>
+
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="lblReservation">
           <i class="fa-solid fa-calendar-check me-2"></i> Nueva reservación / check-in
@@ -282,23 +288,28 @@
       </div>
 
       <div class="modal-body">
+
         <!-- Huésped -->
         <div class="card mb-3">
-          <div class="card-header bg-white fw-semibold"><i class="fa-solid fa-user me-2"></i>Huésped</div>
+          <div class="card-header bg-white fw-semibold">
+            <i class="fa-solid fa-user me-2"></i>Huésped
+          </div>
           <div class="card-body">
             <div class="row g-3">
 
-              <!-- Opción: seleccionar existente -->
+              <!-- Huésped existente (opcional) -->
               <div class="col-12">
                 <label class="form-label">Huésped existente (opcional)</label>
-                <input class="form-control" name="existing_user_id" placeholder="ID de huésped (déjalo vacío si es nuevo)">
+                <input class="form-control" name="existing_user_id" id="res-existing-user"
+                       placeholder="ID de huésped (déjalo vacío si es nuevo)" pattern="^\d*$">
                 <div class="form-text">Si lo dejas vacío, se creará un huésped nuevo con los datos de abajo.</div>
               </div>
 
-              <!-- Nuevo huésped -->
+              <!-- Datos para crear huésped nuevo -->
               <div class="col-md-6">
                 <label class="form-label">Primer nombre</label>
-                <input class="form-control" name="firstname">
+                <input class="form-control res-new-required" name="firstname" id="res-firstname" required>
+                <div class="invalid-feedback">Requerido.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Segundo nombre</label>
@@ -306,19 +317,20 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Primer apellido</label>
-                <input class="form-control" name="firstlastname">
+                <input class="form-control res-new-required" name="lastname1" id="res-lastname1" required>
+                <div class="invalid-feedback">Requerido.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Segundo apellido</label>
-                <input class="form-control" name="secondlastname">
+                <input class="form-control" name="lastname2">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email">
+                <input type="email" class="form-control" name="email" id="res-email">
               </div>
               <div class="col-md-6">
-                <label class="form-label">Teléfono / Dirección (opcional)</label>
-                <input class="form-control" name="user_address">
+                <label class="form-label">Dirección / Teléfono (opcional)</label>
+                <input class="form-control" name="address">
               </div>
               <div class="col-md-6">
                 <label class="form-label">DPI</label>
@@ -328,13 +340,19 @@
                 <label class="form-label">NIT</label>
                 <input class="form-control" name="nit" placeholder="CF si no aplica">
               </div>
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input class="form-control" name="phone">
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Habitación / Fechas -->
         <div class="card">
-          <div class="card-header bg-white fw-semibold"><i class="fa-solid fa-bed me-2"></i>Habitación</div>
+          <div class="card-header bg-white fw-semibold">
+            <i class="fa-solid fa-bed me-2"></i>Habitación
+          </div>
           <div class="card-body">
             <div class="row g-3">
               <div class="col-md-6">
@@ -342,26 +360,37 @@
                 <select class="form-select" name="room_id" id="res-room" required>
                   <option value="">Selecciona…</option>
                   <% if (freeRoomsList != null) {
-                       for (Map<String,Object> r : freeRoomsList) { %>
-                    <option 
-                      value="<%= r.get("room_number") %>"
-                      data-price="<%= r.get("price") %>">
-                      #<%= r.get("room_number") %> — <%= r.get("room_type") %> — Q <%= r.get("price") %>/noche
+                       for (Map<String,Object> r : freeRoomsList) {
+                         String idRoom   = String.valueOf(r.get("id"));          // ID real
+                         String numRoom  = String.valueOf(r.get("room_number"));
+                         String typeName = String.valueOf(r.get("room_type"));
+                         String typeId   = String.valueOf(r.get("id_type"));
+                         String price    = String.valueOf(r.get("price"));
+                  %>
+                    <option value="<%= idRoom %>"
+                            data-typeid="<%= typeId %>"
+                            data-price="<%= price %>">
+                      #<%= numRoom %> — <%= typeName %> — Q <%= price %>/noche
                     </option>
                   <% } } %>
                 </select>
+                <div class="invalid-feedback">Elige una habitación.</div>
               </div>
+
               <div class="col-md-3">
                 <label class="form-label">Entrada</label>
                 <input type="date" class="form-control" name="checkin" id="res-checkin" required>
+                <div class="invalid-feedback">Fecha de entrada requerida.</div>
               </div>
               <div class="col-md-3">
                 <label class="form-label">Salida</label>
                 <input type="date" class="form-control" name="checkout" id="res-checkout" required>
+                <div class="invalid-feedback">Fecha de salida requerida.</div>
               </div>
+
               <div class="col-md-4">
                 <label class="form-label">Noches</label>
-                <input class="form-control" name="nights" id="res-nights" value="1" readonly>
+                <input class="form-control" id="res-nights" value="1" readonly>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Tarifa (Q)</label>
@@ -369,11 +398,13 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">Total estimado (Q)</label>
-                <input class="form-control" name="amount" id="res-total" value="0" readonly>
+                <input class="form-control" name="amount" id="res-total" value="0" readonly required>
               </div>
+
               <div class="col-12">
                 <label class="form-label">Detalle</label>
-                <input class="form-control" name="detail" placeholder="Check-in reservación">
+                <input class="form-control" name="detail" id="res-detail" placeholder="Check-in reservación" required>
+                <div class="invalid-feedback">Detalle requerido.</div>
               </div>
             </div>
           </div>
@@ -391,36 +422,76 @@
 </div>
 
 <script>
-  // abrir modal desde los botones rápidos (puedes poner un botón en tarjetas)
-  // new bootstrap.Modal(document.getElementById('modalReservation')).show();
+(() => {
+  const form     = document.getElementById('formReservation');
+  const selRoom  = document.getElementById('res-room');
+  const typeId   = document.getElementById('res-type-room-id');
+  const checkin  = document.getElementById('res-checkin');
+  const checkout = document.getElementById('res-checkout');
+  const nights   = document.getElementById('res-nights');
+  const price    = document.getElementById('res-price');
+  const total    = document.getElementById('res-total');
+  const detail   = document.getElementById('res-detail');
+  const existing = document.getElementById('res-existing-user');
+  const newReqs  = document.querySelectorAll('.res-new-required');
 
-  const selRoom   = document.getElementById('res-room');
-  const inDate    = document.getElementById('res-checkin');
-  const outDate   = document.getElementById('res-checkout');
-  const nights    = document.getElementById('res-nights');
-  const price     = document.getElementById('res-price');
-  const total     = document.getElementById('res-total');
+  // fechas mínimas hoy
+  const today = new Date().toISOString().slice(0,10);
+  checkin.min = today; checkout.min = today;
 
-  function daysDiff(a,b){
-    if(!a || !b) return 0;
-    const d1 = new Date(a), d2 = new Date(b);
-    const ms = (d2 - d1);
-    return Math.max(0, Math.ceil(ms / (1000*60*60*24)));
+  function parseD(v){ return v ? new Date(v+'T00:00:00') : null; }
+  function diffN(a,b){
+    if(!a||!b) return 1;
+    const d = Math.ceil((b-a)/86400000);
+    return d > 0 ? d : 1;
   }
-
   function recalc(){
-    const n  = daysDiff(inDate.value, outDate.value) || 1;
-    const p  = parseFloat(selRoom.options[selRoom.selectedIndex]?.dataset.price || 0);
+    const opt = selRoom.selectedOptions[0];
+    if (opt){
+      typeId.value = opt.dataset.typeid || '';
+      price.value  = opt.dataset.price || 0;
+    }
+    const n = diffN(parseD(checkin.value), parseD(checkout.value));
     nights.value = n;
-    price.value  = p.toFixed(2);
-    total.value  = (n * p).toFixed(2);
+    total.value  = (parseFloat(price.value||0) * n).toFixed(2);
+    if(!detail.value){
+      const rn = opt ? opt.textContent.split('—')[0].trim() : '';
+      detail.value = rn + ' (' + n + ' noche/s) @Q' + (price.value || 0);
+    }
   }
 
   selRoom.addEventListener('change', recalc);
-  inDate.addEventListener('change', recalc);
-  outDate.addEventListener('change', recalc);
-</script>
+  checkin.addEventListener('change', recalc);
+  checkout.addEventListener('change', recalc);
 
+  // Si hay ID de huésped, desactivar requeridos del nuevo huésped
+  existing.addEventListener('input', () => {
+    const hasId = existing.value.trim().length > 0;
+    newReqs.forEach(i => { i.required = !hasId; });
+  });
+
+  // Validación Bootstrap/HTML5
+  form.addEventListener('submit', (e) => {
+    recalc(); // asegurar totales
+    // si no hay habitacion o type_id, invalidar
+    if (!selRoom.value || !typeId.value) {
+      e.preventDefault(); e.stopPropagation();
+      selRoom.classList.add('is-invalid');
+      return;
+    }
+    // si no hay huésped existente, exigir nombre y apellido
+    if (!existing.value.trim()) {
+      let ok = true;
+      newReqs.forEach(i => { if(!i.value.trim()) ok = false; });
+      if (!ok) { e.preventDefault(); e.stopPropagation(); }
+    }
+    if (!form.checkValidity()) {
+      e.preventDefault(); e.stopPropagation();
+    }
+    form.classList.add('was-validated');
+  });
+})();
+</script>
 
 <script type="text/javascript">
 

@@ -91,4 +91,15 @@
     <servlet-name>DashboardController</servlet-name>
     <url-pattern>/dashboard</url-pattern>
   </servlet-mapping>
+
+  <!-- DASHBOARD -> Controller (NO <jsp-file> aquí) -->
+  <servlet>
+    <servlet-name>HistoryController</servlet-name>
+    <servlet-class>com.umg.controllers.HistoryController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HistoryController</servlet-name>
+    <url-pattern>/history</url-pattern>
+  </servlet-mapping>
+
 </web-app>
