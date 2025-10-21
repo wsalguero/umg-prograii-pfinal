@@ -7,47 +7,19 @@ public class User {
     private String dpi;
     private String nit;
     private String rol;
-    private String user_status;
+    private int user_status;
     private String user_password;
     private String firstname;
-    private String secondName;
-    private String firtsLastname;
-    private String secondLastname;
+    private String secondname;
+    private String firstlastname;
+    private String secondlastname;
 
+    public User() {
+    }
+
+    // Getters y Setters
     public int getId() {
         return id;
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getSecondName() {
-        return secondName;
-    }
-
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
-    }
-
-    public String getFirtsLastname() {
-        return firtsLastname;
-    }
-
-    public void setFirtsLastname(String firtsLastname) {
-        this.firtsLastname = firtsLastname;
-    }
-
-    public String getSecondLastname() {
-        return secondLastname;
-    }
-
-    public void setSecondLastname(String secondLastname) {
-        this.secondLastname = secondLastname;
     }
 
     public void setId(int id) {
@@ -94,11 +66,11 @@ public class User {
         this.rol = rol;
     }
 
-    public String getUser_status() {
+    public int getUser_status() {
         return user_status;
     }
 
-    public void setUser_status(String user_status) {
+    public void setUser_status(int user_status) {
         this.user_status = user_status;
     }
 
@@ -110,4 +82,44 @@ public class User {
         this.user_password = user_password;
     }
 
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getSecondname() {
+        return secondname;
+    }
+
+    public void setSecondname(String secondname) {
+        this.secondname = secondname;
+    }
+
+    public String getFirstlastname() {
+        return firstlastname;
+    }
+
+    public void setFirstlastname(String firstlastname) {
+        this.firstlastname = firstlastname;
+    }
+
+    public String getSecondlastname() {
+        return secondlastname;
+    }
+
+    public void setSecondlastname(String secondlastname) {
+        this.secondlastname = secondlastname;
+    }
+
+    // Método auxiliar para mostrar el nombre completo
+    public String getFullName() {
+        return String.format("%s %s %s %s",
+                firstname != null ? firstname : "",
+                secondname != null ? secondname : "",
+                firstlastname != null ? firstlastname : "",
+                secondlastname != null ? secondlastname : "").trim();
+    }
 }

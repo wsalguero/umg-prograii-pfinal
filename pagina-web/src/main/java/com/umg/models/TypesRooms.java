@@ -1,22 +1,22 @@
 package com.umg.models;
 
 public class TypesRooms {
-    private long id;
+    private int id;
     private String typeDescription;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
     public String getTypeDescription() {
-    return typeDescription;
-}
+        return typeDescription;
+    }
 
-public void setTypeDescription(String typeDescription) {
-    this.typeDescription = typeDescription;
-}
+    public void setTypeDescription(String typeDescription) {
+        this.typeDescription = typeDescription;
+    }
 }

@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List,java.util.Map" %>  <!-- 👈 IMPORTS NECESARIOS -->
+
 <%
   // 🔒 Verificar login
   Object user = session.getAttribute("user");
@@ -6,8 +8,6 @@
       response.sendRedirect(request.getContextPath() + "/login");
       return;
   }
-
-  // Variables para el layout
   request.setAttribute("title", "Dashboard");
   request.setAttribute("active", "dashboard");
 %>
@@ -23,6 +23,21 @@
   }
 %>
 
+<%
+  long kFree   = (request.getAttribute("kpi_free_rooms")   != null) ? (Long) request.getAttribute("kpi_free_rooms")   : 0L;
+  int  kOcc    = (request.getAttribute("kpi_occupancy")    != null) ? (Integer) request.getAttribute("kpi_occupancy")  : 0;
+  long kCheck  = (request.getAttribute("kpi_checkins")     != null) ? (Long) request.getAttribute("kpi_checkins")     : 0L;
+  long kRev    = (request.getAttribute("kpi_revenue")      != null) ? (Long) request.getAttribute("kpi_revenue")      : 0L;
+
+  // 👇 OBTENER TODAS LAS LISTAS CON LOS NOMBRES DE ATRIBUTO CORRECTOS
+  List<Map<String,Object>> recentGuests =
+      (List<Map<String,Object>>) request.getAttribute("recent_guests");
+  List<Map<String,Object>> freeRoomsList =
+      (List<Map<String,Object>>) request.getAttribute("free_rooms_list");
+  List<Map<String,Object>> recentReceipts =
+      (List<Map<String,Object>>) request.getAttribute("recent_receipts");
+%>
+
 <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/styles/pages/dashboard.css">
 
 <section class="container my-4">
@@ -35,7 +50,7 @@
           <i class="fa-solid fa-bed fa-2xl me-3 text-primary"></i>
           <div>
             <div class="fw-semibold text-secondary">Hab. disponibles</div>
-            <div class="h4 mb-0" id="kpi-rooms-free">18</div>
+            <div class="h4 mb-0" id="kpi-rooms-free"><%= kFree %></div>
           </div>
         </div>
       </div>
@@ -48,9 +63,9 @@
             <div class="w-100">
               <div class="fw-semibold text-secondary">Ocupación</div>
               <div class="d-flex align-items-center gap-2">
-                <span class="h5 mb-0" id="kpi-occupancy">72%</span>
+                <span class="h5 mb-0" id="kpi-occupancy"><%= kOcc %>%</span>
                 <div class="progress flex-grow-1" style="height:8px;">
-                  <div class="progress-bar" style="width:72%;"></div>
+                <div class="progress-bar" style="width:<%= kOcc %>%"></div>
                 </div>
               </div>
             </div>
@@ -64,7 +79,7 @@
           <i class="fa-solid fa-user-check fa-2xl me-3 text-success"></i>
           <div>
             <div class="fw-semibold text-secondary">Check-ins hoy</div>
-            <div class="h4 mb-0" id="kpi-checkins">9</div>
+            <div class="h4 mb-0" id="kpi-checkins"><%= kCheck %></div>
           </div>
         </div>
       </div>
@@ -75,7 +90,7 @@
           <i class="fa-solid fa-dollar-sign fa-2xl me-3 text-warning"></i>
           <div>
             <div class="fw-semibold text-secondary">Ingresos (hoy)</div>
-            <div class="h4 mb-0" id="kpi-revenue">Q 3,250</div>
+            <div class="h4 mb-0" id="kpi-revenue">Q <%= kRev %></div>
           </div>
         </div>
       </div>
@@ -85,25 +100,19 @@
   <!-- Acciones rápidas -->
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
-      <div class="d-flex flex-wrap gap-2">
-        <a href="/guests" class="btn btn-primary">
+      <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <a href="<%= request.getContextPath() %>/guests" class="btn btn-primary">
           <i class="fa-solid fa-users me-2"></i> Ver huéspedes
         </a>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddGuest">
-          <i class="fa-solid fa-user-plus me-2"></i> Agregar huésped
-        </button>
-        <a href="/rooms" class="btn btn-info text-white">
+        <a href="<%= request.getContextPath() %>/rooms" class="btn btn-info text-white">
           <i class="fa-solid fa-bed me-2"></i> Ver habitaciones
         </a>
-        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalAddRoom">
-          <i class="fa-solid fa-bed-pulse me-2"></i> Agregar habitación
-        </button>
-        <a href="/receipts" class="btn btn-success">
+        <a href="<%= request.getContextPath() %>/registers" class="btn btn-success">
           <i class="fa-solid fa-file-invoice-dollar me-2"></i> Ver recibos
         </a>
-        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalAddReceipt">
-          <i class="fa-solid fa-file-circle-plus me-2"></i> Nuevo recibo
-        </button>
+        <a href="<%= request.getContextPath() %>/billing" class="btn btn-warning text-white">
+          <i class="fa-solid fa-file-invoice-dollar me-2"></i> Facturar
+        </a>
       </div>
     </div>
   </div>
@@ -128,28 +137,27 @@
                   <th class="text-end">Acciones</th>
                 </tr>
               </thead>
-              <tbody id="tbl-recent-guests">
+              <tbody>
+              <% if (recentGuests == null || recentGuests.isEmpty()) { %>
+                <tr><td colspan="4" class="text-center text-muted py-4">No hay huéspedes recientes.</td></tr>
+              <% } else {
+                  for (Map<String,Object> g : recentGuests) {
+                    String nombre = String.valueOf(g.get("firstname"));
+                    String sn     = String.valueOf(g.get("secondname"));
+                    String ap1    = String.valueOf(g.get("lastname1"));
+                    String ap2    = String.valueOf(g.get("lastname2"));
+                    String hab    = String.valueOf(g.get("room"));
+                    String fecha  = String.valueOf(g.get("checkin_date"));
+              %>
                 <tr>
-                  <td>María López</td>
-                  <td><span class="badge text-bg-primary">203</span></td>
-                  <td>12/10/2025</td>
+                  <td><%= (nombre + " " + (sn==null?"":sn) + " " + (ap1==null?"":ap1) + " " + (ap2==null?"":ap2)).trim() %></td>
+                  <td><%= hab %></td>
+                  <td><%= fecha %></td>
                   <td class="text-end">
-                    <a href="/guests/1" class="btn btn-sm btn-outline-secondary">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
+                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
                   </td>
                 </tr>
-                <tr>
-                  <td>Juan Pérez</td>
-                  <td><span class="badge text-bg-secondary">105</span></td>
-                  <td>12/10/2025</td>
-                  <td class="text-end">
-                    <a href="/guests/2" class="btn btn-sm btn-outline-secondary">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
-                  </td>
-                </tr>
-                <!-- + render dinámico -->
+              <% } } %>
               </tbody>
             </table>
           </div>
@@ -159,6 +167,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Habitaciones disponibles -->
     <div class="col-lg-6">
@@ -172,37 +181,27 @@
             <table class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th>#</th>
-                  <th>Tipo</th>
-                  <th>Tarifa</th>
-                  <th class="text-center">Estado</th>
-                  <th class="text-end">Acciones</th>
+                  <th>#</th><th>Tipo</th><th>Tarifa</th>
+                  <th class="text-center">Estado</th><th class="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tbl-free-rooms">
+              <% if (freeRoomsList == null || freeRoomsList.isEmpty()) { %>
+                <tr><td colspan="5" class="text-center text-muted py-4">No hay habitaciones libres.</td></tr>
+              <% } else {
+                  for (Map<String,Object> r : freeRoomsList) {
+                    String num   = String.valueOf(r.get("room_number"));
+                    String type  = String.valueOf(r.get("room_type"));
+                    String price = String.valueOf(r.get("price"));
+              %>
                 <tr>
-                  <td>201</td>
-                  <td>Queen</td>
-                  <td>Q 320 /noche</td>
+                  <td><%= num %></td>
+                  <td><%= type %></td>
+                  <td>Q <%= price %> /noche</td>
                   <td class="text-center"><span class="badge text-bg-success">Libre</span></td>
-                  <td class="text-end">
-                    <a href="/rooms/201" class="btn btn-sm btn-outline-secondary">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
-                  </td>
+                  <td class="text-end"><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a></td>
                 </tr>
-                <tr>
-                  <td>305</td>
-                  <td>Suite</td>
-                  <td>Q 650 /noche</td>
-                  <td class="text-center"><span class="badge text-bg-success">Libre</span></td>
-                  <td class="text-end">
-                    <a href="/rooms/305" class="btn btn-sm btn-outline-secondary">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
-                  </td>
-                </tr>
-                <!-- + render dinámico -->
+              <% } } %>
               </tbody>
             </table>
           </div>
@@ -212,6 +211,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Recibos recientes (fila completa) -->
     <div class="col-12">
@@ -233,27 +233,32 @@
                 </tr>
               </thead>
               <tbody id="tbl-recent-receipts">
-                <tr>
-                  <td>R-00125</td>
-                  <td>María López</td>
-                  <td>12/10/2025</td>
-                  <td>Q 980.00</td>
-                  <td class="text-end">
-                    <a href="/receipts/R-00125" class="btn btn-sm btn-outline-secondary">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
-                    <a href="/receipts/R-00125/pdf" class="btn btn-sm btn-outline-primary">
-                      <i class="fa-solid fa-file-pdf"></i>
-                    </a>
-                  </td>
-                </tr>
-                <!-- + render dinámico -->
-              </tbody>
+<% if (recentReceipts == null || recentReceipts.isEmpty()) { %>
+  <tr><td colspan="5" class="text-center text-muted py-4">No hay recibos recientes.</td></tr>
+<% } else {
+     for (Map<String,Object> r : recentReceipts) {
+       String num   = String.valueOf(r.get("num"));
+       String guest = String.valueOf(r.get("guest_name"));
+       String fecha = String.valueOf(r.get("bills_date"));
+       String total = String.valueOf(r.get("total"));
+%>
+  <tr>
+    <td><%= num %></td>
+    <td><%= guest %></td>
+    <td><%= fecha %></td>
+    <td>Q <%= total %></td>
+    <td class="text-end">
+      <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
+      <a href="#" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-pdf"></i></a>
+    </td>
+  </tr>
+<%   } } %>
+</tbody>
             </table>
           </div>
         </div>
         <div class="card-footer bg-white text-end">
-          <a href="/receipts" class="btn btn-sm btn-link">Ver todos</a>
+          <a href="<%= request.getContextPath() %>/registers" class="btn btn-sm btn-link">Ver todos</a>
         </div>
       </div>
     </div>
