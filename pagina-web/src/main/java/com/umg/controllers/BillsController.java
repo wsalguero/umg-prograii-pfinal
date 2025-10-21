@@ -21,18 +21,22 @@ public class BillsController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + path);
     }
 
-    /** Retorna lista de huéspedes con pendientes */
+    /**
+     * Huéspedes con resumen de pendientes (incluye user_status para mostrar
+     * badge/validar baja)
+     */
     private List<Map<String, Object>> listGuestsWithPending() throws SQLException {
         String sql = """
                     SELECT u.id,
+                           u.user_status,
                            CONCAT(u.firstname,' ',COALESCE(u.secondname,''),' ',
                                   COALESCE(u.firstlastname,''),' ',COALESCE(u.secondlastname,'')) AS full_name,
                            COALESCE(SUM(CASE WHEN r.pending_payment=1 THEN r.amount ELSE 0 END),0) AS pending_total,
                            SUM(CASE WHEN r.pending_payment=1 THEN 1 ELSE 0 END) AS pending_count
                     FROM users u
-                    LEFT JOIN register r ON r.id_user=u.id AND r.deleted_at IS NULL
-                    WHERE u.rol='guest' AND u.user_status IN (1,2)
-                    GROUP BY u.id
+                    LEFT JOIN register r ON r.id_user = u.id AND r.deleted_at IS NULL
+                    WHERE u.rol='guest'
+                    GROUP BY u.id, u.user_status
                     ORDER BY u.id DESC
                 """;
 
@@ -44,6 +48,7 @@ public class BillsController extends HttpServlet {
             while (rs.next()) {
                 Map<String, Object> g = new HashMap<>();
                 g.put("id", rs.getLong("id"));
+                g.put("user_status", rs.getInt("user_status"));
                 g.put("full_name", rs.getString("full_name"));
                 g.put("pending_total", rs.getBigDecimal("pending_total"));
                 g.put("pending_count", rs.getInt("pending_count"));
@@ -53,7 +58,6 @@ public class BillsController extends HttpServlet {
         }
     }
 
-    /** Registros pendientes */
     private List<Long> pendingRegisterIdsByUser(Connection con, long userId) throws SQLException {
         String sql = "SELECT id FROM register WHERE id_user=? AND pending_payment=1 AND deleted_at IS NULL";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -67,7 +71,6 @@ public class BillsController extends HttpServlet {
         }
     }
 
-    /** Total pendiente */
     private float pendingTotalByUser(Connection con, long userId) throws SQLException {
         String sql = "SELECT COALESCE(SUM(amount),0) FROM register WHERE id_user=? AND pending_payment=1 AND deleted_at IS NULL";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -79,14 +82,12 @@ public class BillsController extends HttpServlet {
         }
     }
 
-    // ------------------- GET -------------------
+    // ---------- GET ----------
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         try {
-            List<Map<String, Object>> guests = listGuestsWithPending();
-            req.setAttribute("guests", guests);
+            req.setAttribute("guests", listGuestsWithPending());
             req.getRequestDispatcher("/WEB-INF/views/billing/index.jsp").forward(req, resp);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -95,90 +96,117 @@ public class BillsController extends HttpServlet {
         }
     }
 
-    // ------------------- POST (Facturar) -------------------
+    // ---------- POST ----------
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         String action = req.getParameter("action");
-        if (!"bill".equals(action)) {
+        if (action == null) {
             redirect(req, resp, "/billing");
             return;
         }
 
-        long userId = Long.parseLong(req.getParameter("user_id"));
-
         try (Connection con = Db.getConnection()) {
-            con.setAutoCommit(false);
+            switch (action) {
+                case "bill": { // FACTURAR (NO cambia estado del huésped)
+                    long userId = Long.parseLong(req.getParameter("user_id"));
+                    con.setAutoCommit(false);
 
-            List<Long> regIds = pendingRegisterIdsByUser(con, userId);
-            if (regIds.isEmpty()) {
-                flash(req, "warn", "No hay consumos pendientes.");
-                redirect(req, resp, "/billing");
-                return;
-            }
+                    List<Long> regIds = pendingRegisterIdsByUser(con, userId);
+                    if (regIds.isEmpty()) {
+                        flash(req, "warn", "No hay consumos pendientes.");
+                        redirect(req, resp, "/billing");
+                        return;
+                    }
 
-            float total = pendingTotalByUser(con, userId);
+                    float total = pendingTotalByUser(con, userId);
 
-            // Crear factura
-            Bills bill = new Bills();
-            bill.setIdUser((int) userId);
-            bill.setBillsDate(LocalDateTime.now());
-            bill.setTotal(total);
+                    // Crear factura
+                    Bills bill = new Bills();
+                    bill.setIdUser((int) userId);
+                    bill.setBillsDate(LocalDateTime.now());
+                    bill.setTotal(total);
 
-            String insertBill = "INSERT INTO bills (id_user, bills_date, total) VALUES (?, NOW(), ?)";
-            try (PreparedStatement ps = con.prepareStatement(insertBill, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setLong(1, userId);
-                ps.setFloat(2, total);
-                ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next())
-                        bill.setNum(keys.getLong(1));
+                    String insBill = "INSERT INTO bills (id_user, bills_date, total) VALUES (?, NOW(), ?)";
+                    try (PreparedStatement ps = con.prepareStatement(insBill, Statement.RETURN_GENERATED_KEYS)) {
+                        ps.setLong(1, userId);
+                        ps.setFloat(2, total);
+                        ps.executeUpdate();
+                        try (ResultSet k = ps.getGeneratedKeys()) {
+                            if (k.next())
+                                bill.setNum(k.getLong(1));
+                        }
+                    }
+
+                    // Detalles
+                    List<BillsDetails> dets = new ArrayList<>();
+                    String insDet = "INSERT INTO bills_details (num, id_registers) VALUES (?, ?)";
+                    try (PreparedStatement ps = con.prepareStatement(insDet)) {
+                        for (Long rid : regIds) {
+                            ps.setLong(1, bill.getNum());
+                            ps.setLong(2, rid);
+                            ps.addBatch();
+
+                            BillsDetails d = new BillsDetails();
+                            d.setNum((int) bill.getNum());
+                            d.setIdRegisters(rid.intValue());
+                            dets.add(d);
+                        }
+                        ps.executeBatch();
+                    }
+                    bill.setDetails(dets.toArray(new BillsDetails[0]));
+
+                    // Marcar registros como pagados
+                    String ph = String.join(",", Collections.nCopies(regIds.size(), "?"));
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "UPDATE register SET pending_payment=0 WHERE id IN (" + ph + ")")) {
+                        int i = 1;
+                        for (Long id : regIds)
+                            ps.setLong(i++, id);
+                        ps.executeUpdate();
+                    }
+
+                    con.commit();
+                    flash(req, "ok", "Factura #" + bill.getNum() + " creada. Total Q" + bill.getTotal());
+                    redirect(req, resp, "/billing");
+                    return;
                 }
-            }
 
-            // Crear detalles
-            List<BillsDetails> detailsList = new ArrayList<>();
-            String insertDetail = "INSERT INTO bills_details (num, id_registers) VALUES (?, ?)";
-            try (PreparedStatement ps = con.prepareStatement(insertDetail)) {
-                for (Long regId : regIds) {
-                    ps.setLong(1, bill.getNum());
-                    ps.setLong(2, regId);
-                    ps.addBatch();
+                case "checkout": { // DAR DE BAJA (sólo cuando tú lo eliges)
+                    long userId = Long.parseLong(req.getParameter("user_id"));
 
-                    BillsDetails detail = new BillsDetails();
-                    detail.setNum((int) bill.getNum());
-                    detail.setIdRegisters(regId.intValue());
-                    detailsList.add(detail);
+                    // opcional: bloquear el checkout si aún tiene pendientes
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "SELECT COUNT(*) FROM register WHERE id_user=? AND pending_payment=1 AND deleted_at IS NULL")) {
+                        ps.setLong(1, userId);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            rs.next();
+                            if (rs.getLong(1) > 0) {
+                                flash(req, "warn",
+                                        "No se puede dar de baja: el huésped aún tiene consumos pendientes.");
+                                redirect(req, resp, "/billing");
+                                return;
+                            }
+                        }
+                    }
+
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "UPDATE users SET user_status=3 WHERE id=?")) {
+                        ps.setLong(1, userId);
+                        ps.executeUpdate();
+                    }
+                    flash(req, "ok", "Huésped dado de baja correctamente.");
+                    redirect(req, resp, "/billing");
+                    return;
                 }
-                ps.executeBatch();
+
+                default:
+                    redirect(req, resp, "/billing");
             }
-            bill.setDetails(detailsList.toArray(new BillsDetails[0]));
-
-            // Actualizar registros
-            String inPlaceholders = String.join(",", Collections.nCopies(regIds.size(), "?"));
-            try (PreparedStatement ps = con
-                    .prepareStatement("UPDATE register SET pending_payment=0 WHERE id IN (" + inPlaceholders + ")")) {
-                int i = 1;
-                for (Long id : regIds)
-                    ps.setLong(i++, id);
-                ps.executeUpdate();
-            }
-
-            // Cambiar estado del huésped
-            try (PreparedStatement ps = con.prepareStatement("UPDATE users SET user_status=3 WHERE id=?")) {
-                ps.setLong(1, userId);
-                ps.executeUpdate();
-            }
-
-            con.commit();
-
-            flash(req, "ok", "Factura #" + bill.getNum() + " creada. Total Q" + bill.getTotal());
-            redirect(req, resp, "/billing");
-
         } catch (SQLException e) {
             e.printStackTrace();
-            flash(req, "error", "Error al crear la factura.");
+            flash(req, "error", "Operación no realizada.");
             redirect(req, resp, "/billing");
         }
     }

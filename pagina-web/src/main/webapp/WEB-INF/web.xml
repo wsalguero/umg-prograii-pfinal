@@ -71,6 +71,16 @@
     <url-pattern>/auth</url-pattern>
   </servlet-mapping>
 
+<!-- RESERVATIONS -->
+<servlet>
+  <servlet-name>ReservationsController</servlet-name>
+  <servlet-class>com.umg.controllers.ReservationsController</servlet-class>
+</servlet>
+<servlet-mapping>
+  <servlet-name>ReservationsController</servlet-name>
+  <url-pattern>/reservations</url-pattern>
+</servlet-mapping>
+
   <!-- DASHBOARD -> Controller (NO <jsp-file> aquí) -->
   <servlet>
     <servlet-name>DashboardController</servlet-name>

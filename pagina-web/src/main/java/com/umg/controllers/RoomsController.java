@@ -37,7 +37,7 @@ public class RoomsController extends HttpServlet {
     // ---------- Queries ----------
     private List<Rooms> getAllRooms() throws SQLException {
         String sql = "SELECT r.id, r.id_type, r.rooms_description, r.price, r.status " +
-                "FROM rooms r WHERE r.status = 1 ORDER BY r.id DESC";
+                "FROM rooms r WHERE r.status > 0 ORDER BY r.id DESC";
         List<Rooms> list = new ArrayList<>();
         try (Connection con = Db.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);

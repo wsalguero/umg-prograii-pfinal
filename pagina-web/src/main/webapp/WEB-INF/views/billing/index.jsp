@@ -29,33 +29,47 @@
       <tr>
         <th>ID</th>
         <th>Huésped</th>
+        <th>Estado</th>
         <th>Consumos pendientes</th>
         <th>Total (Q)</th>
-        <th style="width:160px;">Acciones</th>
+        <th style="width:230px;">Acciones</th>
       </tr>
     </thead>
     <tbody>
     <% if (guests != null) {
          for (Map<String,Object> g : guests) {
            long cnt = ((Number)g.get("pending_count")).longValue();
-           String disabled = cnt==0 ? "disabled" : "";
+           int st   = ((Number)g.get("user_status")).intValue();
+           String disabledBill = cnt==0 ? "" : "";       // se puede facturar si hay pendientes
+           String disabledOut  = (cnt==0 && st!=3) ? "" : "disabled"; // baja sólo sin pendientes y si no está en 3
+           String badge, text;
+           if (st==3) { badge="text-bg-secondary"; text="Baja"; }
+           else if (st==2) { badge="text-bg-warning"; text="Ocupado"; }
+           else if (st==1) { badge="text-bg-success"; text="Activo"; }
+           else { badge="text-bg-light"; text="—"; }
     %>
       <tr>
         <td><%= g.get("id") %></td>
         <td><%= g.get("full_name") %></td>
+        <td><span class="badge <%=badge%>"><%=text%></span></td>
         <td><%= cnt %></td>
         <td>Q <%= g.get("pending_total") %></td>
-        <td>
-          <form action="<%=request.getContextPath()%>/billing" method="POST" class="d-inline">
+        <td class="text-nowrap">
+          <form action="<%=request.getContextPath()%>/billing" method="POST" class="d-inline me-1">
             <input type="hidden" name="action" value="bill">
             <input type="hidden" name="user_id" value="<%= g.get("id") %>">
-            <button class="btn btn-sm btn-success" <%=disabled%>>
-              <i class="fa-solid fa-cash-register me-1"></i> Facturar
+            <button class="btn btn-sm btn-success" <%= (cnt==0 ? "disabled" : "") %>>
+              <i class="fa-solid fa-cash-register me-1"></i> Facturar pendientes
             </button>
           </form>
-          <a href="<%=request.getContextPath()%>/guests" class="btn btn-sm btn-outline-secondary">
-            <i class="fa-solid fa-eye"></i>
-          </a>
+
+          <form action="<%=request.getContextPath()%>/billing" method="POST" class="d-inline">
+            <input type="hidden" name="action" value="checkout">
+            <input type="hidden" name="user_id" value="<%= g.get("id") %>">
+            <button class="btn btn-sm btn-outline-danger" <%= disabledOut %>>
+              <i class="fa-solid fa-person-walking-dashed-line-arrow-right me-1"></i> Dar de baja
+            </button>
+          </form>
         </td>
       </tr>
     <% } } %>

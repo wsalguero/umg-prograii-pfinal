@@ -113,6 +113,9 @@
         <a href="<%= request.getContextPath() %>/billing" class="btn btn-warning text-white">
           <i class="fa-solid fa-file-invoice-dollar me-2"></i> Facturar
         </a>
+        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReservation">
+          <i class="fa-solid fa-calendar-plus me-2"></i> Nueva reservación
+        </button>
       </div>
     </div>
   </div>
@@ -266,147 +269,157 @@
 </section>
 
 
-<!-- Modales -->
-<!-- Modal: Agregar Huésped -->
-<div class="modal fade" id="modalAddGuest" tabindex="-1" aria-labelledby="lblAddGuest" aria-hidden="true">
+<!-- Modal: Nueva reservación -->
+<div class="modal fade" id="modalReservation" tabindex="-1" aria-labelledby="lblReservation" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
+    <form class="modal-content" method="POST" action="<%=request.getContextPath()%>/reservations" id="formReservation">
+      <input type="hidden" name="action" value="create">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="lblAddGuest">
-          <i class="fa-solid fa-user-plus me-2"></i>Crear huésped
+        <h1 class="modal-title fs-5" id="lblReservation">
+          <i class="fa-solid fa-calendar-check me-2"></i> Nueva reservación / check-in
         </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body">
-        <form class="row g-3 needs-validation" novalidate id="formAddGuest">
-          <div class="col-md-6">
-            <label for="g-firstname" class="form-label">Primer nombre</label>
-            <input id="g-firstname" class="form-control" required>
-            <div class="invalid-feedback">Requerido.</div>
-          </div>
-          <div class="col-md-6">
-            <label for="g-secondname" class="form-label">Segundo nombre</label>
-            <input id="g-secondname" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="g-lastname1" class="form-label">Primer apellido</label>
-            <input id="g-lastname1" class="form-control" required>
-            <div class="invalid-feedback">Requerido.</div>
-          </div>
-          <div class="col-md-6">
-            <label for="g-lastname2" class="form-label">Segundo apellido</label>
-            <input id="g-lastname2" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="g-email" class="form-label">Email</label>
-            <input id="g-email" type="email" class="form-control" placeholder="ejemplo@ejemplo.com">
-          </div>
-          <div class="col-md-6">
-            <label for="g-phone" class="form-label">Teléfono</label>
-            <input id="g-phone" class="form-control" placeholder="+502 5555 5555">
-          </div>
-          <div class="col-12">
-            <label for="g-address" class="form-label">Dirección</label>
-            <input id="g-address" class="form-control" placeholder="Dirección">
-          </div>
-          <div class="col-md-6">
-            <label for="g-dpi" class="form-label">DPI</label>
-            <input id="g-dpi" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="g-nit" class="form-label">NIT</label>
-            <div class="input-group">
-              <input id="g-nit" class="form-control" placeholder="CF si no aplica">
-              <button class="btn btn-outline-secondary" type="button" id="btn-cf">
-                <i class="fa-solid fa-id-card"></i>
-              </button>
+        <!-- Huésped -->
+        <div class="card mb-3">
+          <div class="card-header bg-white fw-semibold"><i class="fa-solid fa-user me-2"></i>Huésped</div>
+          <div class="card-body">
+            <div class="row g-3">
+
+              <!-- Opción: seleccionar existente -->
+              <div class="col-12">
+                <label class="form-label">Huésped existente (opcional)</label>
+                <input class="form-control" name="existing_user_id" placeholder="ID de huésped (déjalo vacío si es nuevo)">
+                <div class="form-text">Si lo dejas vacío, se creará un huésped nuevo con los datos de abajo.</div>
+              </div>
+
+              <!-- Nuevo huésped -->
+              <div class="col-md-6">
+                <label class="form-label">Primer nombre</label>
+                <input class="form-control" name="firstname">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Segundo nombre</label>
+                <input class="form-control" name="secondname">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Primer apellido</label>
+                <input class="form-control" name="firstlastname">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Segundo apellido</label>
+                <input class="form-control" name="secondlastname">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Teléfono / Dirección (opcional)</label>
+                <input class="form-control" name="user_address">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">DPI</label>
+                <input class="form-control" name="dpi">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">NIT</label>
+                <input class="form-control" name="nit" placeholder="CF si no aplica">
+              </div>
             </div>
           </div>
-          <div class="col-12 text-end">
-            <button class="btn btn-primary">
-              <i class="fa-solid fa-floppy-disk me-1"></i> Crear
-            </button>
+        </div>
+
+        <!-- Habitación / Fechas -->
+        <div class="card">
+          <div class="card-header bg-white fw-semibold"><i class="fa-solid fa-bed me-2"></i>Habitación</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Habitación libre</label>
+                <select class="form-select" name="room_id" id="res-room" required>
+                  <option value="">Selecciona…</option>
+                  <% if (freeRoomsList != null) {
+                       for (Map<String,Object> r : freeRoomsList) { %>
+                    <option 
+                      value="<%= r.get("room_number") %>"
+                      data-price="<%= r.get("price") %>">
+                      #<%= r.get("room_number") %> — <%= r.get("room_type") %> — Q <%= r.get("price") %>/noche
+                    </option>
+                  <% } } %>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Entrada</label>
+                <input type="date" class="form-control" name="checkin" id="res-checkin" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Salida</label>
+                <input type="date" class="form-control" name="checkout" id="res-checkout" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Noches</label>
+                <input class="form-control" name="nights" id="res-nights" value="1" readonly>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Tarifa (Q)</label>
+                <input class="form-control" id="res-price" value="0" readonly>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Total estimado (Q)</label>
+                <input class="form-control" name="amount" id="res-total" value="0" readonly>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Detalle</label>
+                <input class="form-control" name="detail" placeholder="Check-in reservación">
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
+
       </div>
-    </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success">
+          <i class="fa-solid fa-circle-check me-1"></i> Confirmar reservación
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
-<!-- Modal: Agregar Habitación -->
-<div class="modal fade" id="modalAddRoom" tabindex="-1" aria-labelledby="lblAddRoom" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="lblAddRoom">
-          <i class="fa-solid fa-bed-pulse me-2"></i>Nueva habitación
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <form class="row g-3" id="formAddRoom">
-          <div class="col-md-4">
-            <label for="r-number" class="form-label">N°</label>
-            <input id="r-number" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label for="r-type" class="form-label">Tipo</label>
-            <select id="r-type" class="form-select">
-              <option>Single</option>
-              <option>Queen</option>
-              <option>King</option>
-              <option>Suite</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label for="r-rate" class="form-label">Tarifa (Q/noche)</label>
-            <input id="r-rate" type="number" min="0" class="form-control" value="350">
-          </div>
-          <div class="col-12 text-end">
-            <button class="btn btn-info text-white">
-              <i class="fa-solid fa-floppy-disk me-1"></i> Guardar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+<script>
+  // abrir modal desde los botones rápidos (puedes poner un botón en tarjetas)
+  // new bootstrap.Modal(document.getElementById('modalReservation')).show();
 
-<!-- Modal: Nuevo recibo -->
-<div class="modal fade" id="modalAddReceipt" tabindex="-1" aria-labelledby="lblAddReceipt" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="lblAddReceipt">
-          <i class="fa-solid fa-file-circle-plus me-2"></i>Nuevo recibo
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <form class="row g-3" id="formAddReceipt">
-          <div class="col-12">
-            <label for="rcp-guest" class="form-label">Huésped</label>
-            <input id="rcp-guest" class="form-control" placeholder="Nombre del huésped">
-          </div>
-          <div class="col-6">
-            <label for="rcp-date" class="form-label">Fecha</label>
-            <input id="rcp-date" type="date" class="form-control">
-          </div>
-          <div class="col-6">
-            <label for="rcp-total" class="form-label">Total (Q)</label>
-            <input id="rcp-total" type="number" min="0" class="form-control">
-          </div>
-          <div class="col-12 text-end">
-            <button class="btn btn-success">
-              <i class="fa-solid fa-floppy-disk me-1"></i> Crear recibo
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+  const selRoom   = document.getElementById('res-room');
+  const inDate    = document.getElementById('res-checkin');
+  const outDate   = document.getElementById('res-checkout');
+  const nights    = document.getElementById('res-nights');
+  const price     = document.getElementById('res-price');
+  const total     = document.getElementById('res-total');
+
+  function daysDiff(a,b){
+    if(!a || !b) return 0;
+    const d1 = new Date(a), d2 = new Date(b);
+    const ms = (d2 - d1);
+    return Math.max(0, Math.ceil(ms / (1000*60*60*24)));
+  }
+
+  function recalc(){
+    const n  = daysDiff(inDate.value, outDate.value) || 1;
+    const p  = parseFloat(selRoom.options[selRoom.selectedIndex]?.dataset.price || 0);
+    nights.value = n;
+    price.value  = p.toFixed(2);
+    total.value  = (n * p).toFixed(2);
+  }
+
+  selRoom.addEventListener('change', recalc);
+  inDate.addEventListener('change', recalc);
+  outDate.addEventListener('change', recalc);
+</script>
 
 
 <script type="text/javascript">
