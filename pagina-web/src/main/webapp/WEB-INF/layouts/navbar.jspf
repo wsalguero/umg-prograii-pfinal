@@ -35,7 +35,6 @@
               <i class="bi bi-person-circle"></i> <%= userFirstname %>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="<%=ctx%>/profile">Mi perfil</a></li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item text-danger" href="<%=ctx%>/logout">Cerrar sesi&oacute;n</a>
