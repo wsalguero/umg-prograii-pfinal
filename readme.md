@@ -1,5 +1,9 @@
 # Hoteles App
 
+## video demo
+
+https://drive.google.com/file/d/16baY0FKA11Cq74s80ywpwoxlUy4WiCbD/view?usp=drive_link
+
 ### Setup
 
 Para crear el proyecto se utilizan el comando
