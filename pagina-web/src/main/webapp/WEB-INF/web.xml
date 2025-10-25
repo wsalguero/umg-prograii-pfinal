@@ -27,6 +27,16 @@
     <url-pattern>/registers</url-pattern>
   </servlet-mapping>
 
+  <!-- LOGOUT -->
+  <servlet>
+    <servlet-name>LogoutController</servlet-name>
+    <servlet-class>com.umg.controllers.LogoutController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LogoutController</servlet-name>
+    <url-pattern>/logout</url-pattern>
+  </servlet-mapping>
+
   <!-- ROOMS -> Controller -->
   <servlet>
     <servlet-name>RoomsController</servlet-name>
@@ -71,15 +81,15 @@
     <url-pattern>/auth</url-pattern>
   </servlet-mapping>
 
-<!-- RESERVATIONS -->
-<servlet>
-  <servlet-name>ReservationsController</servlet-name>
-  <servlet-class>com.umg.controllers.ReservationsController</servlet-class>
-</servlet>
-<servlet-mapping>
-  <servlet-name>ReservationsController</servlet-name>
-  <url-pattern>/reservations</url-pattern>
-</servlet-mapping>
+  <!-- RESERVATIONS -->
+  <servlet>
+    <servlet-name>ReservationsController</servlet-name>
+    <servlet-class>com.umg.controllers.ReservationsController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ReservationsController</servlet-name>
+    <url-pattern>/reservations</url-pattern>
+  </servlet-mapping>
 
   <!-- DASHBOARD -> Controller (NO <jsp-file> aquí) -->
   <servlet>

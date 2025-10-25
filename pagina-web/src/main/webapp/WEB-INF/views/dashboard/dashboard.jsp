@@ -108,7 +108,7 @@
           <i class="fa-solid fa-bed me-2"></i> Ver habitaciones
         </a>
         <a href="<%= request.getContextPath() %>/registers" class="btn btn-success">
-          <i class="fa-solid fa-file-invoice-dollar me-2"></i> Ver recibos
+          <i class="fa-solid fa-file-invoice-dollar me-2"></i> Registros
         </a>
         <a href="<%= request.getContextPath() %>/billing" class="btn btn-warning text-white">
           <i class="fa-solid fa-file-invoice-dollar me-2"></i> Facturar
@@ -140,7 +140,6 @@
                   <th>Nombre</th>
                   <th>Habitación</th>
                   <th>Entrada</th>
-                  <th class="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,9 +158,6 @@
                   <td><%= (nombre + " " + (sn==null?"":sn) + " " + (ap1==null?"":ap1) + " " + (ap2==null?"":ap2)).trim() %></td>
                   <td><%= hab %></td>
                   <td><%= fecha %></td>
-                  <td class="text-end">
-                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
-                  </td>
                 </tr>
               <% } } %>
               </tbody>
@@ -188,7 +184,7 @@
               <thead class="table-light">
                 <tr>
                   <th>#</th><th>Tipo</th><th>Tarifa</th>
-                  <th class="text-center">Estado</th><th class="text-end">Acciones</th>
+                  <th class="text-center">Estado</th>
                 </tr>
               </thead>
               <tbody id="tbl-free-rooms">
@@ -205,7 +201,6 @@
                   <td><%= type %></td>
                   <td>Q <%= price %> /noche</td>
                   <td class="text-center"><span class="badge text-bg-success">Libre</span></td>
-                  <td class="text-end"><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a></td>
                 </tr>
               <% } } %>
               </tbody>
@@ -235,7 +230,6 @@
                   <th>Huésped</th>
                   <th>Fecha</th>
                   <th>Total</th>
-                  <th class="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tbl-recent-receipts">
@@ -253,10 +247,6 @@
     <td><%= guest %></td>
     <td><%= fecha %></td>
     <td>Q <%= total %></td>
-    <td class="text-end">
-      <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
-      <a href="#" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-pdf"></i></a>
-    </td>
   </tr>
 <%   } } %>
 </tbody>

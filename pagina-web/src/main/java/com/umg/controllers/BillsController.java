@@ -173,10 +173,10 @@ public class BillsController extends HttpServlet {
                     return;
                 }
 
-                case "checkout": { // DAR DE BAJA (sólo cuando tú lo eliges)
+                case "checkout": { // DAR DE BAJA
                     long userId = Long.parseLong(req.getParameter("user_id"));
 
-                    // opcional: bloquear el checkout si aún tiene pendientes
+                    // bloquear el checkout si aún tiene pendientes
                     try (PreparedStatement ps = con.prepareStatement(
                             "SELECT COUNT(*) FROM register WHERE id_user=? AND pending_payment=1 AND deleted_at IS NULL")) {
                         ps.setLong(1, userId);

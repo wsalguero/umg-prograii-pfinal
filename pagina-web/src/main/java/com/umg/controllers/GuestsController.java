@@ -32,7 +32,8 @@ public class GuestsController extends HttpServlet {
 
     private List<User> getAllGuests(boolean onlyActive) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users " + (onlyActive ? "WHERE user_status=1 " : "") + "ORDER BY id DESC";
+        String sql = "SELECT * FROM users " + (onlyActive ? "WHERE user_status=1 " : "")
+                + "AND role = 'guest' ORDER BY id DESC";
         try (Connection con = Db.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
